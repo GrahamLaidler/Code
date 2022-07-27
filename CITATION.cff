@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: StochasticNeighbourhoodComponentsAnalysis
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: Graham
+    family-names: Laidler
+    orcid: 'https://orcid.org/0000-0002-7985-5567'
