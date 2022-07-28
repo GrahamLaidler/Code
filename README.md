@@ -1,5 +1,7 @@
 # Stochastic Neighbourhood Components Analysis
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6923145.svg)](https://doi.org/10.5281/zenodo.6923145)
+
 This repository contains data and code used in the analysis of SNCA.
 
 The following files should be used to run the analysis:
