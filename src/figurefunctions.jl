@@ -1,5 +1,5 @@
 function plot2d(x_matrix, y, A)
-    #will plot first two rows of A
+    #prepare to plot data projected in the first two rows of A
     D = size(x_matrix,1)
     x =svectorscopy(x_matrix, Val(D))
     cellsx=sort(countmap(x); byvalue=true, rev=true)
@@ -177,7 +177,7 @@ function Figure6()
 
     Random.seed!(1234*5)
     x_partitions = balanced_kfold(y, 2)
-    GR.setarrowsize(0.7)
+    GR.setarrowsize(0.5)
     trans_points, densities, emp1 = plot2d(x_matrix[:,x_partitions[2]], y[x_partitions[2]], A_SNCA)
     Wfabpointsplot = scatter([bₗ[1] for bₗ in trans_points], [bₗ[2] for bₗ in trans_points],
         markersize = densities./500, 
@@ -190,7 +190,7 @@ function Figure6()
         colorbar_title = L"\hat{q}(Y=1|X)",
         dpi=600)
     Wfabpointsplot = annotate!(13, -3.5, text("State 1", :black, :left, 8))
-    Wfabpointsplot = plot!([12.3,8.5],[-3.3,-2.4],arrow = :closed, color=:black,linewidth=1,label="")
+    Wfabpointsplot = plot!([12.3,8],[-3.3,-2.2],arrow = :closed, color=:black,linewidth=1,label="")
     Wfabpointsplot = annotate!(52, -1, text("State 2", :black, :left, 8))
     Wfabpointsplot = plot!([51.3,46.8],[-0.8,0.44],arrow = :closed, color=:black,linewidth=1,label="")
 
@@ -216,6 +216,6 @@ function Figure6()
         color=[:orange :violetred4 :black],
         label="")
 
-    plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1200,400), margin=5mm)
+    plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1500,500), margin=5mm)
     return plots_Wfab
 end
