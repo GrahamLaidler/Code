@@ -180,7 +180,7 @@ function Figure6()
     GR.setarrowsize(0.5)
     trans_points, densities, emp1 = plot2d(x_matrix[:,x_partitions[2]], y[x_partitions[2]], A_SNCA)
     Wfabpointsplot = scatter([bₗ[1] for bₗ in trans_points], [bₗ[2] for bₗ in trans_points],
-        markersize = densities./500, 
+        markersize = densities./25, 
         markerz = emp1,
         markerstrokewidth = 0.5,
         legend = false,
