@@ -1,6 +1,5 @@
 include("src/functionswrapper.jl")
 include("src/figurefunctions.jl")
-using Plots, Plots.PlotMeasures, LaTeXStrings
 
 ## Figure 2
 Figure2()  

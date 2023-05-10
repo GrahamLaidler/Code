@@ -8,6 +8,7 @@ using Distances,
     LinearAlgebra,
     LatinHypercubeSampling,
     JLD2,
+    Plots,
     Plots.PlotMeasures,
     LaTeXStrings
 
