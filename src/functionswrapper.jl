@@ -7,7 +7,9 @@ using Distances,
     LineSearches, 
     LinearAlgebra,
     LatinHypercubeSampling,
-    JLD2
+    JLD2,
+    Plots.PlotMeasures,
+    LaTeXStrings
 
 abstract type NCAMethod end
 struct NCALog <: NCAMethod end
