@@ -1,10 +1,8 @@
 using Distances,
     StaticArrays,
     Random, 
-    #Distributions, #
     StatsBase, 
     ProgressMeter, 
-    #MultivariateStats, # 
     Optim, 
     LineSearches, 
     LinearAlgebra,
