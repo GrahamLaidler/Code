@@ -170,6 +170,31 @@ function Figure5()
 end
 
 function Figure6()
+    SNCA_time = load_object("res/TQ_SNCA_time.jld2")
+    NCA_time_pointwise = load_object("res/TQ_NCA_time_pointwise.jld2")
+
+    timingplot = plot([[mean(SNCA_time[i])./60 for i in 1:10],
+        [mean(NCA_time_pointwise[i])./60 for i in 1:10]],
+        ribbon = [(1.96/sqrt(10)).*[std(SNCA_time[i])./60 for i in 1:10],
+        (1.96/sqrt(10)).*[std(NCA_time_pointwise[i])./60 for i in 1:10]],
+        fillalpha=0.3, linewidth = 2,
+        legend = :topleft, color=[:orange :violetred4],
+        label = ["SNCA" "NCA"],
+        ylabel = "time (minutes)",
+        xlabel = L"n",
+        xticks = 1:1:10,
+        xformatter = i -> Int64(1000i),
+        dpi=600,
+        size=(600,400)
+    )
+    timingplot = scatter!([[(mean(SNCA_time[i])./60) for i in 1:10],
+        [(mean(NCA_time_pointwise[i])./60) for i in 1:10]],
+        color=[:orange :violetred4], labels = :none
+    )
+    return timingplot
+end
+
+function Figure7()
     WF_data = load_object("dat/WF_data.jld2")
     A_SNCA = load_object("res/WF_SNCA_A.jld2")
     x_matrix = Matrix{Float64}(transpose(WF_data[:,1:(end-1)]));

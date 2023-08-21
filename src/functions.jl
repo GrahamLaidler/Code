@@ -96,20 +96,27 @@ function knnMSE(x_matrix, y, k, A)
 end
 
 
-function NCAiterate(Xs, ys; objective=NCAStandard())
+function NCAiterate(Xs, ys; objective=NCAStandard(), version="grouped", inits=10)
     D = size(Xs[1],1)
     maxk = maximum(length(countmap(svectorscopy(Xs[i], Val(D))))-1 for i in 1:length(Xs))
     knnaccMat = Matrix{Float64}(undef, maxk, length(Xs))
+    times = Vector{Float64}(undef, length(Xs))
     @showprogress "NCA 10 iterations: " for i in 1:length(Xs) 
         Random.seed!(i)
-        initializations = initsLHS(D^2, n=10, style=initMatrix(), nrows=4)
+        initializations = initsLHS(D^2, n=inits, style=initMatrix(), nrows=D)    
         x = svectorscopy(Xs[i], Val(D))
         objvalues = Vector{Float64}(undef, length(initializations))
         solns = Array{Array{Float64, 2}, 1}(undef, length(initializations))
-        for j in 1:length(initializations)
+        times[i] = @elapsed for j in 1:length(initializations)
             r = size(initializations[j], 1)
             Random.seed!(j)
-            res = optimize(Optim.only_fg!((F,G,A) -> NCArepeatsfg!(F,G,A,x,ys[i],objective=objective,dims=Val(r))), initializations[j], LBFGS(linesearch=LineSearches.BackTracking()))
+            if version == "grouped"
+                res = optimize(Optim.only_fg!((F,G,A) -> NCArepeatsfg!(F,G,A,x,ys[i],objective=objective,dims=Val(r))), initializations[j], LBFGS(linesearch=LineSearches.BackTracking()))
+            elseif version == "pointwise"
+                res = optimize(Optim.only_fg!((F,G,A) -> NCAfg!(F,G,A,x,ys[i],objective=objective,dims=Val(r))), initializations[j], LBFGS(linesearch=LineSearches.BackTracking()))
+            else
+                throw(ArgumentError("Argument 'version' should be 'grouped' or 'pointwise' in NCAiterate()"))
+            end
             objvalues[j] = res.minimum
             solns[j] = res.minimizer
         end
@@ -120,22 +127,23 @@ function NCAiterate(Xs, ys; objective=NCAStandard())
             knnaccMat[k,i] = knnacc
         end
     end
-    return knnaccMat
+    return knnaccMat, times
 end
 
-function SNCArowiterate(Xs, ys; objective=NCAStandard())
+function SNCArowiterate(Xs, ys; objective=NCAStandard(), inits=10)
     D = size(Xs[1],1)
     maxk = maximum(length(countmap(svectorscopy(Xs[i], Val(D))))-1 for i in 1:length(Xs))
     knnaccMat = Matrix{Float64}(undef, maxk, length(Xs))
+    times = Vector{Float64}(undef, length(Xs))
     @showprogress "SNCA 10 iterations: " for i in 1:length(Xs) 
         x = svectorscopy(Xs[i], Val(D))
-        objvalue, A_res = algSNCA(Xs[i], ys[i], objective=objective)
+        times[i] = @elapsed objvalue, A_res = algSNCA(Xs[i], ys[i], objective=objective, inits=inits)
         for k in 1:(length(countmap(x))-1)
             knnacc = knnMSE(x_matrix, y, k, A_res)[1]
             knnaccMat[k,i] = knnacc
         end
     end
-    return knnaccMat
+    return knnaccMat, times
 end
 
 function Euclideanres(x_matrix, y, iterations)
@@ -156,7 +164,7 @@ function NCAiterateunseen(Xs, ys, xlarge_matrix, ylarge, rndm; objective=NCAStan
     D = size(Xs[1],1)
     xfull = svectorscopy(xlarge_matrix, Val(D))
     knnaccMat = zeros(6, length(Xs))
-    initializations = initsLHS(D^2, n=10, style=initMatrix(), nrows=4)
+    initializations = initsLHS(D^2, n=10, style=initMatrix(), nrows=D)
     Random.seed!(rndm)
     Statesorder = shuffle(unique(xfull))
     for i in 1:length(Xs) 

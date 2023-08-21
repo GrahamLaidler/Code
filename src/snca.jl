@@ -198,12 +198,16 @@ Run the SNCA algorithm with data x_matrix and y, with defined objective scaling.
 
 """
 
-function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard())
+function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
     size(x_matrix,2)==length(y) || throw(ArgumentError("number of columns of x_matrix and length of y should be the same."))
     D = size(x_matrix, 1)
     x = svectorscopy(x_matrix, Val(D))
     A_res = Array{Float64}(undef, 0, D)
-    LHSinitializations = initsLHS(D, n=10)
+    if inits == 1
+        LHSinitializations = [rand(1, D)]
+    else
+        LHSinitializations = initsLHS(D, n=inits)
+    end
     objvalues = Vector{Float64}(undef, length(LHSinitializations))
     solns = Array{Array{Float64, 2}, 1}(undef, length(LHSinitializations))
     aggP = Matrix(I, D, D)

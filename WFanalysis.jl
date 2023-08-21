@@ -22,14 +22,13 @@ for i in 1:5
         ym = y[x_partitions[m]]
         rare = findall(x -> x < 25, countmap(xm))
         rare_indx = findall(in(rare), xm)
-        x_metrictrain = x_matrixm[:,Not(rare_indx)]
+        x_metrictrain = x_matrixm[:, setdiff(1:size(x_matrixm, 2), rare_indx)]
         x_metrictrainSvec = svectorscopy(x_metrictrain, Val(11))
-        y_metrictrain = ym[Not(rare_indx)]
+        y_metrictrain = ym[setdiff(1:size(x_matrixm, 2), rare_indx)]
         x_kNN_rare = x_matrixm[:,rare_indx]
         y_kNN_rare = ym[rare_indx]
 
         Random.seed!(2*(i-1) + m)
-        objvalue_SNCA, A_SNCA = algSNCA(x_metrictrain, y_metrictrain, objective=NCALog())
         SNCA_Metrics[2*(i-1) + m] = A_SNCA
         Random.seed!(2*(i-1) + m)
         initializations = initsLHS(11^2, n=10, style=initMatrix(), nrows=11);
@@ -58,5 +57,5 @@ save_object("res/WF_SNCA_kNN.jld2", SNCA_kNN)
 save_object("res/WF_NCA_kNN.jld2", NCA_kNN)
 save_object("res/WF_Euclidean_kNN.jld2", Euclidean_kNN)
 
-#save example SNCA solution matrix for Figure 6 (left)
+#save example SNCA solution matrix for Figure 7 (left)
 save_object("res/WF_SNCA_A.jld2", SNCA_Metrics[10])

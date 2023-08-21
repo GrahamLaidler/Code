@@ -25,3 +25,8 @@ println("Finished figure 5")
 Figure6()  
 savefig("fig/Fig6.png")
 println("Finished figure 6")
+
+## Figure 7
+Figure7()  
+savefig("fig/Fig7.png")
+println("Finished figure 7")

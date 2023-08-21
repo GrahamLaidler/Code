@@ -48,22 +48,27 @@ save_object("res/TQ_SNCA_klkth.jld2", SNCAKLkth)
 save_object("res/TQ_NCA_klkth.jld2", NCAKLkth)
 
 
-##for Figure 5 (left)
-NCA_Acc= Array{Matrix{Float64}, 1}(undef, 10);
+##for Figure 5 (left) and Figure 6
+NCA_Acc = Array{Matrix{Float64}, 1}(undef, 10);
 SNCA_Acc = Array{Matrix{Float64}, 1}(undef, 10);
 Euclidean_Acc = Array{Matrix{Float64}, 1}(undef, 10);
+SNCA_time = Array{Vector{Float64}, 1}(undef, 10);
+NCA_time_pointwise = Array{Vector{Float64}, 1}(undef, 10);
 for n in 1:10
     println("n =  $n 000:")
     x_n = x_matrix[:,1:(10000*n)]
     y_n = y[1:(10000*n)]
     Xs, ys = sliceData(x_n, y_n, n*1000)
-    NCA_Acc[n] = NCAiterate(Xs, ys, objective=NCALog())
-    SNCA_Acc[n] = SNCArowiterate(Xs, ys, objective=NCALog())
+    NCA_Acc[n] = NCAiterate(Xs, ys, objective=NCALog())[1]
+    SNCA_Acc[n], SNCA_time[n] = SNCArowiterate(Xs, ys, objective=NCALog())
+    NCA_time_pointwise[n] = NCAiterate(Xs, ys, objective=NCALog(), version="pointwise")[2]
     Euclidean_Acc[n] = Euclideanres(x_matrix, y, 10)
 end
 save_object("res/TQ_NCA_Acc.jld2", NCA_Acc)
 save_object("res/TQ_SNCA_Acc.jld2", SNCA_Acc)
 save_object("res/TQ_Euclidean_Acc.jld2", Euclidean_Acc)
+save_object("res/TQ_NCA_time_pointwise.jld2", NCA_time_pointwise)
+save_object("res/TQ_SNCA_time.jld2", SNCA_time)
 
 #for Figure 5 (right)
 NCA_Acc_test = Array{Matrix{Float64}, 1}(undef, 10);
