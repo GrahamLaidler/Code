@@ -34,12 +34,13 @@ function Figure2()
         legend = false,
         ylim = (-1.8, 3),
         colorbar = false,
+        tickfontsize = 7,
         dpi=600,
         size = (600,150))
 
     zerosklkth_SNCA = load_object("res/TQ_SNCA_klkth_0.jld2")
     SNCAKL = plot(zerosklkth_SNCA[1], linecolor = "black", alpha = 0.5, linewidth = 2,
-        xlabel = L"k", ylabel = "KL divergence", size = (600,150), dpi=600)
+        xlabel = L"k", ylabel = L"\textrm{KL \ divergence}", size = (600,150), dpi=600)
     SNCAKL = scatter!(zerosklkth_SNCA[1],
         markersize = zerosklkth_SNCA[3]./500,
         markerz = zerosklkth_SNCA[2],
@@ -47,9 +48,10 @@ function Figure2()
         legend = false,
         ylim=(-0.05,0.8),
         colorbar = false,
+        tickfontsize = 7,
         dpi=600)
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_SNCA[2]),maximum(zerosklkth_SNCA[2])],
-        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", grid=false)
+        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
     plots_SNCA = plot(SNCAscatter, SNCAKL, h2, layout=l)
     return plots_SNCA
@@ -69,12 +71,13 @@ function Figure3()
         legend = false,
         ylim = (-66,12),
         colorbar = false,
+        tickfontsize = 7,
         dpi=600,
         size = (600,150))
 
     zerosklkth_NCA = load_object("res/TQ_NCA_klkth_0.jld2")
     NCAKL = plot(zerosklkth_NCA[1], linecolor = "black", alpha = 0.5, linewidth = 2,
-        xlabel = L"k", ylabel = "KL divergence", size = (600,150), dpi=600)
+        xlabel = L"k", ylabel = L"\textrm{KL \ divergence}", size = (600,150), dpi=600)
     NCAKL = scatter!(zerosklkth_NCA[1],
         markersize = zerosklkth_NCA[3]./500,
         markerz = zerosklkth_NCA[2],
@@ -82,9 +85,10 @@ function Figure3()
         legend = false,
         ylim=(-0.05,0.8),
         colorbar = false,
+        tickfontsize = 7,
         dpi=600)
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_NCA[2]),maximum(zerosklkth_NCA[2])],
-        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", grid=false)
+        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
     plots_NCA = plot(NCAscatter, NCAKL, h2, layout=l)
     return plots_NCA
@@ -96,9 +100,10 @@ function Figure4()
     KLtokthplot = plot([SNCAKLkth, NCAKLkth],
         legend = :bottomright, color=[:orange :violetred4],
         linewidth = 2,
-        label = ["SNCA" "NCA"],
-        ylabel = "KL divergence",
+        label = [L"\textrm{SNCA}" L"\textrm{NCA}"],
+        ylabel = L"\textrm{KL \ divergence}",
         xlabel = L"k",
+        tickfontsize = 7,
         size = (600, 300),
         dpi=600)
     KLtokthplot = scatter!([SNCAKLkth, NCAKLkth], color=[:orange :violetred4], labels = :none)
@@ -123,15 +128,15 @@ function Figure5()
         [(std(Euclidean_Acc[i], dims=2))[1] for i in 1:10]], fillalpha=0.3, linewidth = 2,
         legend = :bottomright, color=[:orange :violetred4 :black],
         #ylim = (0.5,0.65),
-        label = ["SNCA" "NCA" "Euclidean"],
-        ylabel = "1NN Accuracy",
+        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}"],
+        ylabel = L"\textrm{1NN \ Accuracy}",
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
         dpi=600,
         size=(600,300)
     )
-    NNAccplot = plot!([1; 10], [NNoptvalue; NNoptvalue], lc=:black, linewidth = 2, linestyle=:dash, label="Optimal 1NN")
+    NNAccplot = plot!([1; 10], [NNoptvalue; NNoptvalue], lc=:black, linewidth = 2, linestyle=:dash, label=L"\textrm{Optimal \ 1NN}")
     NNAccplot = scatter!([[(sum(SNCA_Acc[i], dims=2)./10)[1] for i in 1:10],
         [(sum(NCA_Acc[i], dims=2)./10)[1] for i in 1:10]],
         color=[:orange :violetred4], labels = :none
@@ -152,8 +157,8 @@ function Figure5()
         (1.96/sqrt(60)).*[std(NNopt_Acc_test[i]) for i in 1:10]], fillalpha=0.3, linewidth = 2,
         legend = :bottomright, color=[:orange :violetred4 :black :black],
         linestyle = [:solid :solid :solid :dash],
-        label = ["SNCA" "NCA" "Euclidean" "Optimal 1NN"],
-        ylabel = "1NN Accuracy",
+        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}" L"\textrm{Optimal \ 1NN}"],
+        ylabel = L"\textrm{1NN \ Accuracy}",
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
@@ -179,8 +184,8 @@ function Figure6()
         (1.96/sqrt(10)).*[std(NCA_time_pointwise[i])./60 for i in 1:10]],
         fillalpha=0.3, linewidth = 2,
         legend = :topleft, color=[:orange :violetred4],
-        label = ["SNCA" "NCA"],
-        ylabel = "time (minutes)",
+        label = [L"\textrm{SNCA}" L"\textrm{NCA}"],
+        ylabel = L"\textrm{time \ (minutes)}",
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
@@ -213,10 +218,11 @@ function Figure7()
         ylim = (-7,13),
         colorbar = true,
         colorbar_title = L"\hat{q}(Y=1|X)",
+        tickfontsize = 10,
         dpi=600)
-    Wfabpointsplot = annotate!(13, -3.5, text("State 1", :black, :left, 8))
+    Wfabpointsplot = annotate!(13, -3.5, text(L"\textrm{State \ 1}", :black, :left, 9))
     Wfabpointsplot = plot!([12.3,8],[-3.3,-2.2],arrow = :closed, color=:black,linewidth=1,label="")
-    Wfabpointsplot = annotate!(52, -1, text("State 2", :black, :left, 8))
+    Wfabpointsplot = annotate!(52, -1, text(L"\textrm{State \ 2}", :black, :left, 9))
     Wfabpointsplot = plot!([51.3,46.8],[-0.8,0.44],arrow = :closed, color=:black,linewidth=1,label="")
 
     SNCA_kNN = load_object("res/WF_SNCA_kNN.jld2")
@@ -230,10 +236,14 @@ function Figure7()
         (1.96/sqrt(10)).*[std(NCA_kNN, dims=2)],
         (1.96/sqrt(10)).*[std(Euclidean_kNN, dims=2)]], fillalpha=0.3, linewidth=2,
         legend=:bottomleft,
-        label = ["SNCA" "NCA" "Euclidean"],
+        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}"],
         color=[:orange :violetred4 :black],
-        ylabel = "kNN Accuracy",
+        ylabel = L"k\textrm{NN \ Accuracy}",
         xlabel = L"k",
+        tickfontsize = 10,
+        xguidefontsize = 12,
+        yguidefontsize = 12,
+        legendfontsize = 10,
         dpi=600)
     WfabkNNplot = scatter!([sum(SNCA_kNN,dims=2)./10,
         sum(NCA_kNN,dims=2)./10, 
@@ -241,6 +251,6 @@ function Figure7()
         color=[:orange :violetred4 :black],
         label="")
 
-    plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1500,500), margin=5mm)
+    plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1500,500), margin=6mm)
     return plots_Wfab
 end
