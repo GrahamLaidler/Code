@@ -49,11 +49,12 @@ function Figure2()
         ylim=(-0.05,0.8),
         colorbar = false,
         tickfontsize = 7,
-        dpi=600)
+        dpi=600,
+        size = (600,150))
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_SNCA[2]),maximum(zerosklkth_SNCA[2])],
         xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
-    plots_SNCA = plot(SNCAscatter, SNCAKL, h2, layout=l)
+    plots_SNCA = plot(SNCAscatter, SNCAKL, h2, layout=l, dpi=1200)
     return plots_SNCA
 end
 
@@ -86,11 +87,12 @@ function Figure3()
         ylim=(-0.05,0.8),
         colorbar = false,
         tickfontsize = 7,
-        dpi=600)
+        dpi=600,
+        size = (600,150))
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_NCA[2]),maximum(zerosklkth_NCA[2])],
         xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
-    plots_NCA = plot(NCAscatter, NCAKL, h2, layout=l)
+    plots_NCA = plot(NCAscatter, NCAKL, h2, layout=l, dpi=1200)
     return plots_NCA
 end
 
