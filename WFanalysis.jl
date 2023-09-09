@@ -29,6 +29,7 @@ for i in 1:5
         y_kNN_rare = ym[rare_indx]
 
         Random.seed!(2*(i-1) + m)
+        objvalue_SNCA, A_SNCA = algSNCA(x_metrictrain, y_metrictrain, objective=NCALog())
         SNCA_Metrics[2*(i-1) + m] = A_SNCA
         Random.seed!(2*(i-1) + m)
         initializations = initsLHS(11^2, n=10, style=initMatrix(), nrows=11);
