@@ -213,9 +213,7 @@ function SNCArowiterateunseen(Xs, ys, xlarge_matrix, ylarge, rndm; objective=NCA
             kNN_trainy = ylarge[indx.==false]
             kNN_testx = xlarge_matrix[:,indx.==true]
             kNN_testy = ylarge[indx.==true]
-            objvalues = Vector{Float64}(undef, 10)
-            solns = Array{Array{Float64, 2}, 1}(undef, 10)
-            objvalue, A_res = algSNCA(metric_trainx, metric_trainy, objective=objective)
+            A_res = algSNCA(metric_trainx, metric_trainy, objective=objective)[2]
             knncorrect = knnMSEtest(kNN_trainx, kNN_trainy, kNN_testx, kNN_testy, 1, A_res)
             knnaccMat[l,i] += knncorrect/size(kNN_testx, 2)
         end
