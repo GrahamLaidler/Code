@@ -33,6 +33,8 @@ function Figure2()
         markerstrokewidth = 0.5,
         legend = false,
         ylim = (-1.8, 3),
+        xlabel = L"A \mathbf{\textit{x}} [1]",
+        ylabel = L"A \mathbf{\textit{x}} [2]",
         colorbar = false,
         tickfontsize = 7,
         dpi=600,
@@ -52,7 +54,7 @@ function Figure2()
         dpi=600,
         size = (600,150))
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_SNCA[2]),maximum(zerosklkth_SNCA[2])],
-        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
+        xlims=(1,1.1), clims=(0.1,0.8), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
     plots_SNCA = plot(SNCAscatter, SNCAKL, h2, layout=l, dpi=1200)
     return plots_SNCA
@@ -70,7 +72,9 @@ function Figure3()
         markerz = emp1,
         markerstrokewidth = 0.5,
         legend = false,
-        ylim = (-66,12),
+        ylim = (-70,20),
+        xlabel = L"A \mathbf{\textit{x}} [1]",
+        ylabel = L"A \mathbf{\textit{x}} [2]",
         colorbar = false,
         tickfontsize = 7,
         dpi=600,
@@ -90,7 +94,7 @@ function Figure3()
         dpi=600,
         size = (600,150))
     h2 = scatter([0,0], [0,1], zcolor=[minimum(zerosklkth_NCA[2]),maximum(zerosklkth_NCA[2])],
-        xlims=(1,1.1), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
+        xlims=(1,1.1), clims=(0.1,0.8), framestyle=:none, label="", colorbar_title=L"\hat{q}(Y=1|X)", tickfontsize = 7, grid=false)
     l = @layout [grid(2, 1) a{0.035w}]
     plots_NCA = plot(NCAscatter, NCAKL, h2, layout=l, dpi=1200)
     return plots_NCA
@@ -122,15 +126,10 @@ function Figure5()
     y = Vector{Int64}(TQ_data[:,end]);
     NNoptvalue = NNopt(x_matrix, y)
 
-    NNAccplot = plot([[(sum(SNCA_Acc[i], dims=2)./10)[1] for i in 1:10],
-        [(sum(NCA_Acc[i], dims=2)./10)[1] for i in 1:10],
-        [(sum(Euclidean_Acc[i], dims=2)./10)[1] for i in 1:10]],
-        ribbon = [(1.96/sqrt(10)).*[(std(SNCA_Acc[i], dims=2))[1] for i in 1:10],
-        (1.96/sqrt(10)).*[(std(NCA_Acc[i], dims=2))[1] for i in 1:10],
-        [(std(Euclidean_Acc[i], dims=2))[1] for i in 1:10]], fillalpha=0.3, linewidth = 2,
-        legend = :bottomright, color=[:orange :violetred4 :black],
-        #ylim = (0.5,0.65),
-        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}"],
+    NNAccplot = plot([1; 10], [NNoptvalue; NNoptvalue], 
+        lc=:black, linewidth = 2, linestyle=:dash, 
+        label=L"\textrm{Optimal \ 1NN}",
+        legend = :bottomright, 
         ylabel = L"\textrm{1NN \ Accuracy}",
         xlabel = L"n",
         xticks = 1:1:10,
@@ -138,7 +137,24 @@ function Figure5()
         dpi=600,
         size=(600,300)
     )
-    NNAccplot = plot!([1; 10], [NNoptvalue; NNoptvalue], lc=:black, linewidth = 2, linestyle=:dash, label=L"\textrm{Optimal \ 1NN}")
+    NNAccplot = plot!([(sum(SNCA_Acc[i], dims=2)./10)[1] for i in 1:10],
+        ribbon = (1.96/sqrt(10)).*[(std(SNCA_Acc[i], dims=2))[1] for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        color = :orange,
+        label = L"\textrm{SNCA}"
+    )
+    NNAccplot = plot!([(sum(NCA_Acc[i], dims=2)./10)[1] for i in 1:10],
+        ribbon = (1.96/sqrt(10)).*[(std(NCA_Acc[i], dims=2))[1] for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        color = :violetred4,
+        label = L"\textrm{NCA}"
+    )
+    NNAccplot = plot!([(sum(Euclidean_Acc[i], dims=2)./10)[1] for i in 1:10],
+        ribbon = [(std(Euclidean_Acc[i], dims=2))[1] for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        color = :black,
+        label = L"\textrm{Euclidean}"
+    )
     NNAccplot = scatter!([[(sum(SNCA_Acc[i], dims=2)./10)[1] for i in 1:10],
         [(sum(NCA_Acc[i], dims=2)./10)[1] for i in 1:10]],
         color=[:orange :violetred4], labels = :none
@@ -149,24 +165,46 @@ function Figure5()
     Euclidean_Acc_test = load_object("res/TQ_Euclidean_Acc_test.jld2")
     NNopt_Acc_test = load_object("res/TQ_NNopt_Acc_test.jld2")
 
-    NNtestAccplot = plot([[(sum(SNCA_Acc_test[i]))/60 for i in 1:10],
-        [(sum(NCA_Acc_test[i]))/60 for i in 1:10],
-        [(sum(Euclidean_Acc_test[1]))/60 for i in 1:10],
-        [(sum(NNopt_Acc_test[2]))/60 for i in 1:10]],
-        ribbon = [(1.96/sqrt(60)).*[std(SNCA_Acc_test[i]) for i in 1:10],
-        (1.96/sqrt(60)).*[std(NCA_Acc_test[i]) for i in 1:10],
-        (1.96/sqrt(60)).*[std(Euclidean_Acc_test[i]) for i in 1:10],
-        (1.96/sqrt(60)).*[std(NNopt_Acc_test[i]) for i in 1:10]], fillalpha=0.3, linewidth = 2,
-        legend = :bottomright, color=[:orange :violetred4 :black :black],
-        linestyle = [:solid :solid :solid :dash],
-        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}" L"\textrm{Optimal \ 1NN}"],
+    NNtestAccplot = plot([(sum(NNopt_Acc_test[i]))/60 for i in 1:10],
+        #[(sum(NCA_Acc_test[i]))/60 for i in 1:10],
+        #[(sum(Euclidean_Acc_test[1]))/60 for i in 1:10],
+        #[(sum(NNopt_Acc_test[2]))/60 for i in 1:10]],
+        ribbon = (1.96/sqrt(60)).*[std(NNopt_Acc_test[i]) for i in 1:10],
+        #(1.96/sqrt(60)).*[std(NCA_Acc_test[i]) for i in 1:10],
+        #(1.96/sqrt(60)).*[std(Euclidean_Acc_test[i]) for i in 1:10],
+        #(1.96/sqrt(60)).*[std(NNopt_Acc_test[i]) for i in 1:10]],
+        fillalpha=0.3, linewidth = 2,
+        legend = :bottomright, color=:black,
+        linestyle = :dash,
+        label = L"\textrm{Optimal \ 1NN}", #L"\textrm{NCA}" L"\textrm{Euclidean}" L"\textrm{Optimal \ 1NN}"],
         ylabel = L"\textrm{1NN \ Accuracy}",
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
         dpi=600,
         size=(600,300)
-        )
+    )
+    NNtestAccplot = plot!([(sum(SNCA_Acc_test[i]))/60 for i in 1:10],
+        ribbon = (1.96/sqrt(60)).*[std(SNCA_Acc_test[i]) for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        legend = :bottomright, color=:orange,
+        linestyle = :solid,
+        label = L"\textrm{SNCA}"
+    ) 
+    NNtestAccplot = plot!([(sum(NCA_Acc_test[i]))/60 for i in 1:10],
+        ribbon = (1.96/sqrt(60)).*[std(NCA_Acc_test[i]) for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        legend = :bottomright, color=:violetred4,
+        linestyle = :solid,
+        label = L"\textrm{NCA}"
+    )
+    NNtestAccplot = plot!([(sum(Euclidean_Acc_test[1]))/60 for i in 1:10],
+        ribbon = (1.96/sqrt(60)).*[std(Euclidean_Acc_test[i]) for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        legend = :bottomright, color=:black,
+        linestyle = :solid,
+        label = L"\textrm{Euclidean}"
+    )
     NNtestAccplot = scatter!([[(sum(SNCA_Acc_test[i]))/60 for i in 1:10],
         [(sum(NCA_Acc_test[i]))/60 for i in 1:10]],
         color=[:orange :violetred4], labels = :none
@@ -180,19 +218,23 @@ function Figure6()
     SNCA_time = load_object("res/TQ_SNCA_time.jld2")
     NCA_time_pointwise = load_object("res/TQ_NCA_time_pointwise.jld2")
 
-    timingplot = plot([[mean(SNCA_time[i])./60 for i in 1:10],
-        [mean(NCA_time_pointwise[i])./60 for i in 1:10]],
-        ribbon = [(1.96/sqrt(10)).*[std(SNCA_time[i])./60 for i in 1:10],
-        (1.96/sqrt(10)).*[std(NCA_time_pointwise[i])./60 for i in 1:10]],
+    timingplot = plot([mean(SNCA_time[i])./60 for i in 1:10],
+        ribbon = (1.96/sqrt(10)).*[std(SNCA_time[i])./60 for i in 1:10],
         fillalpha=0.3, linewidth = 2,
-        legend = :topleft, color=[:orange :violetred4],
-        label = [L"\textrm{SNCA}" L"\textrm{NCA}"],
+        legend = :topleft, color=:orange,
+        label = L"\textrm{SNCA}",
         ylabel = L"\textrm{time \ (minutes)}",
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
         dpi=600,
         size=(600,400)
+    )
+    timingplot = plot!([mean(NCA_time_pointwise[i])./60 for i in 1:10],
+        ribbon = (1.96/sqrt(10)).*[std(NCA_time_pointwise[i])./60 for i in 1:10],
+        fillalpha=0.3, linewidth = 2,
+        color=:violetred4,
+        label = L"\textrm{NCA}"
     )
     timingplot = scatter!([[(mean(SNCA_time[i])./60) for i in 1:10],
         [(mean(NCA_time_pointwise[i])./60) for i in 1:10]],
@@ -207,39 +249,39 @@ function Figure7()
     x_matrix = Matrix{Float64}(transpose(WF_data[:,1:(end-1)]));
     y = Vector{Int64}(WF_data[:,end]);
 
-    Random.seed!(1234*5)
+    Random.seed!(1234*1)
     x_partitions = balanced_kfold(y, 2)
     GR.setarrowsize(0.5)
-    trans_points, densities, emp1 = plot2d(x_matrix[:,x_partitions[2]], y[x_partitions[2]], A_SNCA)
-    Wfabpointsplot = scatter([bₗ[1] for bₗ in trans_points], [bₗ[2] for bₗ in trans_points],
+    trans_points, densities, emp1 = plot2d(x_matrix[:,x_partitions[1]], y[x_partitions[1]], A_SNCA)
+    Wfabpointsplot = scatter([-bₗ[1] for bₗ in trans_points], [-bₗ[2] for bₗ in trans_points],
         markersize = densities./25, 
         markerz = emp1,
         markerstrokewidth = 0.5,
         legend = false,
-        xlim = (-20,70),
-        ylim = (-7,13),
+        xlim = (-40,130),
+        ylim = (-7,25),
         colorbar = true,
         colorbar_title = L"\hat{q}(Y=1|X)",
+        xlabel = L"A \mathbf{\textit{x}} [1]",
+        ylabel = L"A \mathbf{\textit{x}} [2]",
         tickfontsize = 10,
         dpi=600)
-    Wfabpointsplot = annotate!(13, -3.5, text(L"\textrm{State \ 1}", :black, :left, 9))
-    Wfabpointsplot = plot!([12.3,8],[-3.3,-2.2],arrow = :closed, color=:black,linewidth=1,label="")
-    Wfabpointsplot = annotate!(52, -1, text(L"\textrm{State \ 2}", :black, :left, 9))
-    Wfabpointsplot = plot!([51.3,46.8],[-0.8,0.44],arrow = :closed, color=:black,linewidth=1,label="")
+    Wfabpointsplot = annotate!(31, -3.9, text(L"\textrm{State \ 1}", :black, :left, 10))
+    Wfabpointsplot = plot!([30,20],[-4,-3],arrow = :closed, color=:black,linewidth=1,label="")
+    Wfabpointsplot = annotate!(95, 7, text(L"\textrm{State \ 2}", :black, :left, 10))
+    Wfabpointsplot = plot!([94,85],[7,8.7],arrow = :closed, color=:black,linewidth=1,label="")
 
     SNCA_kNN = load_object("res/WF_SNCA_kNN.jld2")
     NCA_kNN = load_object("res/WF_NCA_kNN.jld2")
     Euclidean_kNN = load_object("res/WF_Euclidean_kNN.jld2")
 
-    WfabkNNplot = plot([sum(SNCA_kNN,dims=2)./10,
-        sum(NCA_kNN,dims=2)./10, 
-        sum(Euclidean_kNN,dims=2)./10],
-        ribbon = [(1.96/sqrt(10)).*[std(SNCA_kNN, dims=2)],
-        (1.96/sqrt(10)).*[std(NCA_kNN, dims=2)],
-        (1.96/sqrt(10)).*[std(Euclidean_kNN, dims=2)]], fillalpha=0.3, linewidth=2,
+    WfabkNNplot = plot(sum(SNCA_kNN,dims=2)./10,
+        ribbon = (1.96/sqrt(10)).*std(SNCA_kNN, dims=2),
+        label = L"\textrm{SNCA}",
+        color = :orange,
+        fillalpha = 0.3,
+        linewidth = 2,
         legend=:bottomleft,
-        label = [L"\textrm{SNCA}" L"\textrm{NCA}" L"\textrm{Euclidean}"],
-        color=[:orange :violetred4 :black],
         ylabel = L"k\textrm{NN \ Accuracy}",
         xlabel = L"k",
         tickfontsize = 10,
@@ -247,6 +289,18 @@ function Figure7()
         yguidefontsize = 12,
         legendfontsize = 10,
         dpi=600)
+    WfabkNNplot = plot!(sum(NCA_kNN,dims=2)./10,
+        ribbon = (1.96/sqrt(10)).*std(NCA_kNN, dims=2),
+        label = L"\textrm{NCA}",
+        color = :violetred4,
+        fillalpha = 0.3,
+        linewidth = 2)    
+    WfabkNNplot = plot!(sum(Euclidean_kNN,dims=2)./10,
+        ribbon = (1.96/sqrt(10)).*std(Euclidean_kNN, dims=2),
+        label = L"\textrm{Euclidean}",
+        color = :black,
+        fillalpha = 0.3,
+        linewidth = 2)
     WfabkNNplot = scatter!([sum(SNCA_kNN,dims=2)./10,
         sum(NCA_kNN,dims=2)./10, 
         sum(Euclidean_kNN,dims=2)./10], 

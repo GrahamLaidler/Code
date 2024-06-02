@@ -13,6 +13,7 @@ NCA_kNN = Matrix{Float64}(undef, 30, 10);
 Euclidean_kNN = Matrix{Float64}(undef, 30, 10);
 
 for i in 1:5
+
     Random.seed!(1234*i)
     x_partitions = balanced_kfold(y, 2)
     for m in 1:2
@@ -59,4 +60,4 @@ save_object("res/WF_NCA_kNN.jld2", NCA_kNN)
 save_object("res/WF_Euclidean_kNN.jld2", Euclidean_kNN)
 
 #save example SNCA solution matrix for Figure 7 (left)
-save_object("res/WF_SNCA_A.jld2", SNCA_Metrics[10])
+save_object("res/WF_SNCA_A.jld2", SNCA_Metrics[1])

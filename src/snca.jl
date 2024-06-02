@@ -182,6 +182,23 @@ function initsLHS(vars; n, style::initMethod=initRow(), nrows=1)
     return initializations
 end
 
+
+"""
+Manifold optimization for orthogonality constraint
+The manifold Orth() is used to optimize functions over N x n matrices with orthogonal rows, i.e. such that X'X is diagonal.
+Orth() uses an SVD algorithm to compute the retraction.
+"""
+struct Orth <: Manifold
+end
+
+function Optim.retract!(M::Orth, X::Matrix{Float64})
+    U,S,V = svd(X)
+    X .= S.*U*V'
+end
+
+Optim.project_tangent!(M::Orth, G, X) = (XG = X'G; G .-= X*((XG .+ XG')./2))
+
+
 """
     algSNCA(x_matrix, y; objective)
 
@@ -226,7 +243,7 @@ function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
         if j > 1
             oldobj = SNCA(A_res[1:(end-1),:], x, y, objective=objective, dims=Val(j-1))
             newobj = SNCA(A_res, x, y, objective=objective, dims=Val(j))
-            if oldobj <= newobj
+            if round(oldobj, digits = 5) <= round(newobj, digits = 5)
                 A_res = A_res[1:(end-1),:]
                 break                
             end
@@ -239,8 +256,8 @@ function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
         end
     end
     SolutionD = size(A_res, 1)
-    objvalue = SNCA(A_res, x, y, objective=objective, dims=Val(SolutionD))
-    return objvalue, A_res
+    A_res_final = optimize(A -> SNCA(A, x, y, objective=objective, dims = Val(SolutionD)), A_res, Optim.LBFGS(manifold=Orth(), linesearch=LineSearches.BackTracking())).minimizer
+    objvalue = SNCA(A_res_final, x, y, objective=objective, dims=Val(SolutionD))
+    return objvalue, A_res_final
 end
-
 
