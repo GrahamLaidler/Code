@@ -110,6 +110,7 @@ function Figure4()
         ylabel = L"\textrm{KL \ divergence}",
         xlabel = L"k",
         tickfontsize = 7,
+        ylim=(-0.02,0.5),
         size = (600, 300),
         dpi=600)
     KLtokthplot = scatter!([SNCAKLkth, NCAKLkth], color=[:orange :violetred4], labels = :none)
@@ -134,6 +135,8 @@ function Figure5()
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
+        ylim=(0.547,0.65),
+        yticks=(0.55:0.02:0.65),
         dpi=600,
         size=(600,300)
     )
@@ -181,6 +184,8 @@ function Figure5()
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
+        ylim=(0.547,0.65),
+        yticks=(0.55:0.02:0.65),
         dpi=600,
         size=(600,300)
     )
@@ -210,7 +215,7 @@ function Figure5()
         color=[:orange :violetred4], labels = :none
     )
 
-    plots_TQNN = plot(NNAccplot, NNtestAccplot, layout=(1,2), size=(1200,400), link=:all, margin=5mm)
+    plots_TQNN = plot(NNAccplot, NNtestAccplot, layout=(1,2), size=(1200,400), margin=5mm)
     return plots_TQNN
 end
 
@@ -227,6 +232,7 @@ function Figure6()
         xlabel = L"n",
         xticks = 1:1:10,
         xformatter = i -> Int64(1000i),
+        ylim=(-10,300),
         dpi=600,
         size=(600,400)
     )
@@ -284,6 +290,7 @@ function Figure7()
         legend=:bottomleft,
         ylabel = L"k\textrm{NN \ Accuracy}",
         xlabel = L"k",
+        ylim=(0.525, 0.7),
         tickfontsize = 10,
         xguidefontsize = 12,
         yguidefontsize = 12,
