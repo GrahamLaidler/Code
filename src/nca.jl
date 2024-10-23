@@ -335,3 +335,97 @@ function NCArepeatsfg!(F, G, A, x::AbstractVector{SVector{D,T}}, y::AbstractVect
         return -Fvalue
     end   
 end
+
+
+# Functions NCAincremental and algNCA can be used to run NCA under the same orthogonality
+# conditions as SNCA: use algNCA in the same way as algSNCA
+
+function NCAincremental(A, A_fixed, x::AbstractVector{SVector{D,T}}, aggP, y::AbstractVector; objective=NCAStandard(), dims::Val{P}) where {P,D,T,L}
+    A = SMatrix{P,D,T}(A)
+    NCAincremental(A, A_fixed, x, aggP, y; objective=objective)
+end
+function NCAincremental(A::SMatrix{P,D,T,L}, A_fixed, x::AbstractVector{SVector{D,T}}, aggP, y::AbstractVector; objective::NCAMethod=NCAStandard()) where {P,D,T,L}
+    joint = [(xᵢ,yᵢ) for (xᵢ,yᵢ) ∈ zip(x,y)]
+    cells = countmap(joint)
+    n = length(y)
+    d = SqEuclidean()
+    value = 0.0
+    distances = Vector{T}(undef, length(cells))
+    currentprojs = Vector{Vector{T}}(undef, length(cells))
+    newprojs = Vector{Vector{T}}(undef, length(cells))
+    for (i,kᵢ) in enumerate(keys(cells))
+        currentprojs[i] = A_fixed*kᵢ[1]
+        newprojs[i] = A*aggP*kᵢ[1]
+    end
+    for (i,kᵢ) in enumerate(keys(cells))
+        for (j,kⱼ) ∈ enumerate(keys(cells))
+            distances[j] = d(newprojs[i], newprojs[j]) + d(currentprojs[i], currentprojs[j])
+        end
+        distances .-= minimum(distances[j] for (j,kⱼ) ∈ enumerate(keys(cells))) 
+        pᵢ = zero(eltype(distances))
+        totalᵢ = zero(eltype(distances))
+        for (j,kⱼ) ∈ enumerate(keys(cells))
+            tmp = exp(-distances[j]) * cells[kⱼ] 
+            pᵢ += tmp * (kⱼ[2] == kᵢ[2]) 
+            totalᵢ += tmp
+        end
+        if objective isa NCAStandard
+            value += pᵢ/totalᵢ * cells[kᵢ]
+        elseif objective isa NCALog
+            value += (log(pᵢ)-log(totalᵢ)) * cells[kᵢ]
+        end
+    end
+    return -value/n
+end
+
+
+function algNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10, δ=0)
+    size(x_matrix,2)==length(y) || throw(ArgumentError("number of columns of x_matrix and length of y should be the same."))
+    D = size(x_matrix, 1)
+    x = svectorscopy(x_matrix, Val(D))
+    vals = Vector{Float64}(undef, D)
+    A_res = Array{Float64}(undef, 0, D)
+    if inits == 1
+        LHSinitializations = [rand(1, D)]
+    else
+        LHSinitializations = initsLHS(D, n=inits)
+    end
+    objvalues = Vector{Float64}(undef, length(LHSinitializations))
+    solns = Array{Array{Float64, 2}, 1}(undef, length(LHSinitializations))
+    aggP = Matrix(I, D, D)
+    for j in 1:D
+        @showprogress "row $j: " for i in 1:length(LHSinitializations) 
+            Random.seed!(i*j)
+            resSNCA = optimize(A -> NCAincremental(A, vcat(zeros(1,D), A_res), x, aggP, y, objective = objective, dims = Val(1)), LHSinitializations[i],
+                LBFGS(linesearch=LineSearches.BackTracking()))
+            objvalues[i] = resSNCA.minimum
+            solns[i] = resSNCA.minimizer
+        end
+        rankedsolns = sortperm(objvalues)
+        best = rankedsolns[1]
+        aⱼ = solns[best]
+        A_res = vcat(A_res, aⱼ)
+        if j == 1
+            vals[j] = objvalues[best]
+        else
+            oldobj = NCA(A_res[1:(end-1),:], x, y, objective=objective, dims=Val(j-1))
+            newobj = NCA(A_res, x, y, objective=objective, dims=Val(j))
+            vals[j] = newobj
+            if 100*(round(oldobj, digits = 5) - round(newobj, digits = 5))/oldobj <= δ 
+                A_res = A_res[1:(end-1),:]
+                break                
+            end
+        end
+        if j < D
+            aⱼhat = aⱼ/norm(aⱼ)
+            P = Matrix(I, D, D) - transpose(aⱼhat) * aⱼhat
+            aggP = aggP * P
+            LHSinitializations = [Matrix(transpose(P*LHSinitializations[i]')) for i in 1:length(LHSinitializations)]
+        end
+    end
+    SolutionD = size(A_res, 1)
+    A_res_final = optimize(Optim.only_fg!((F,G,A) -> NCArepeatsfg!(F,G,A,x,y,objective=objective,dims=Val(SolutionD))), A_res, Optim.LBFGS(manifold=Orth(), linesearch=LineSearches.BackTracking())).minimizer
+    objvalue = NCA(A_res_final, x, y, objective=objective, dims=Val(SolutionD))
+    return objvalue, A_res_final, vals
+end
+
