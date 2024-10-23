@@ -211,14 +211,17 @@ Run the SNCA algorithm with data x_matrix and y, with defined objective scaling.
 - `objective` is a named argument which whould be of type `NCAMethod`. Choose from:
     - `NCAStandard()` for standard (which is the default).
     - `NCALog()` for log.
+- `inits` is the number of initialisations to use for each row's optimisation
+- `δ` is a parameter for the percentage objective value improvement to use as a stopping criterion in the first stage of the optimisation. Must be from 0 to 1. Default is 0.
 ```
 
 """
 
-function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
+function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10, δ=0)
     size(x_matrix,2)==length(y) || throw(ArgumentError("number of columns of x_matrix and length of y should be the same."))
     D = size(x_matrix, 1)
     x = svectorscopy(x_matrix, Val(D))
+    vals = Vector{Float64}(undef, D)
     A_res = Array{Float64}(undef, 0, D)
     if inits == 1
         LHSinitializations = [rand(1, D)]
@@ -240,10 +243,13 @@ function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
         best = rankedsolns[1]
         aⱼ = solns[best]
         A_res = vcat(A_res, aⱼ)
-        if j > 1
+        if j == 1
+            vals[j] = objvalues[best]
+        else
             oldobj = SNCA(A_res[1:(end-1),:], x, y, objective=objective, dims=Val(j-1))
             newobj = SNCA(A_res, x, y, objective=objective, dims=Val(j))
-            if round(oldobj, digits = 5) <= round(newobj, digits = 5)
+            vals[j] = newobj
+            if 100*(round(oldobj, digits = 5) - round(newobj, digits = 5))/oldobj <= δ 
                 A_res = A_res[1:(end-1),:]
                 break                
             end
@@ -258,6 +264,6 @@ function algSNCA(x_matrix, y::AbstractVector; objective=NCAStandard(), inits=10)
     SolutionD = size(A_res, 1)
     A_res_final = optimize(A -> SNCA(A, x, y, objective=objective, dims = Val(SolutionD)), A_res, Optim.LBFGS(manifold=Orth(), linesearch=LineSearches.BackTracking())).minimizer
     objvalue = SNCA(A_res_final, x, y, objective=objective, dims=Val(SolutionD))
-    return objvalue, A_res_final
+    return objvalue, A_res_final, vals
 end
 

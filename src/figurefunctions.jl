@@ -18,9 +18,48 @@ function plot2d(x_matrix, y, A)
     trans_points = [A*bₗ for bₗ in points]
     return trans_points, densities, emp1
 end 
-    
 
 function Figure2()
+    vals = load_object("res/TQ_SNCA_vals.jld2")
+    objvalue = load_object("res/TQ_SNCA_objvalue.jld2")
+    A_SNCA = load_object("res/TQ_SNCA_A.jld2")
+    # TQ_data = load_object("dat/TQ_data.jld2")
+    # x_matrix = Matrix{Float64}(transpose(TQ_data[:,1:(end-1)]));
+    # x = svectorscopy(x_matrix, Val(4));
+    # y = Vector{Int64}(TQ_data[:,end]);
+    # Euclid = SNCA(Matrix(I, 4, 4),x,y,objective=NCALog(),dims=Val(4));
+    r = size(A_SNCA)[1]
+    objvalueplot = plot(-vals[1:r],
+        legend = :bottomright, color = :orange,
+        linewidth = 2,
+        label = :none,
+        ylabel = "objective value",
+        xlabel = L"r",
+        tickfontsize = 7,
+        ylim=(-0.6353, -0.6347),
+        size = (600, 300),
+        dpi=600)
+    objvalueplot = plot!(-vals[1:r+1],
+        color = :orange, linestyle = :dash,
+        linewidth = 2, label = :none)
+    objvalueplot = plot!([r, r], [-vals[r], -objvalue],
+        color = :violetred4,
+        linestyle = :dot,
+        label = :none)
+    objvalueplot = scatter!(-vals[1:r+1],
+        color = :orange,
+        label = "First stage")
+    objvalueplot = scatter!([r], [-objvalue],
+        color = :violetred4,
+        label = "Second stage")
+    # objvalueplot = plot!([-Inf,Inf], [-Euclid, -Euclid],
+    #     color = :black, linestyle = :dash,
+    #     linewidth = 2, label = :none)
+    return objvalueplot
+end
+    
+
+function Figure3()
     TQ_SNCA_A = load_object("res/TQ_SNCA_A.jld2")
     TQ_data = load_object("dat/TQ_data.jld2")
     x_matrix = Matrix{Float64}(transpose(TQ_data[:,1:(end-1)]));
@@ -60,7 +99,7 @@ function Figure2()
     return plots_SNCA
 end
 
-function Figure3()
+function Figure4()
     TQ_NCA_A = load_object("res/TQ_NCA_A.jld2")
     TQ_data = load_object("dat/TQ_data.jld2")
     x_matrix = Matrix{Float64}(transpose(TQ_data[:,1:(end-1)]));
@@ -100,7 +139,7 @@ function Figure3()
     return plots_NCA
 end
 
-function Figure4()
+function Figure5()
     SNCAKLkth = load_object("res/TQ_SNCA_klkth.jld2")
     NCAKLkth = load_object("res/TQ_NCA_klkth.jld2")
     KLtokthplot = plot([SNCAKLkth, NCAKLkth],
@@ -117,7 +156,7 @@ function Figure4()
     return KLtokthplot
 end
 
-function Figure5()
+function Figure6()
     SNCA_Acc = load_object("res/TQ_SNCA_Acc.jld2")
     NCA_Acc = load_object("res/TQ_NCA_Acc.jld2")
     Euclidean_Acc = load_object("res/TQ_Euclidean_Acc.jld2")
@@ -219,7 +258,7 @@ function Figure5()
     return plots_TQNN
 end
 
-function Figure6()
+function Figure7()
     SNCA_time = load_object("res/TQ_SNCA_time.jld2")
     NCA_time_pointwise = load_object("res/TQ_NCA_time_pointwise.jld2")
 
@@ -249,11 +288,38 @@ function Figure6()
     return timingplot
 end
 
-function Figure7()
+function Figure8()
     WF_data = load_object("dat/WF_data.jld2")
     A_SNCA = load_object("res/WF_SNCA_A.jld2")
     x_matrix = Matrix{Float64}(transpose(WF_data[:,1:(end-1)]));
     y = Vector{Int64}(WF_data[:,end]);
+
+    vals = load_object("res/WF_SNCA_vals.jld2")
+    objvalue = load_object("res/WF_SNCA_objvalue.jld2")
+    r = size(A_SNCA)[1]
+    objvalueplot = plot(-vals[1:r],
+        legend = :bottomright, color = :orange,
+        linewidth = 2,
+        label = :none,
+        ylabel = "objective value",
+        xlabel = L"r",
+        tickfontsize = 7,
+        ylim=(-0.611, -0.605),
+        size = (600, 300),
+        dpi=600)
+    objvalueplot = plot!(-vals[1:r+1],
+        color = :orange, linestyle = :dash,
+        linewidth = 2, label = :none)
+    objvalueplot = plot!([r, r], [-vals[r], -objvalue],
+        color = :violetred4,
+        linestyle = :dot,
+        label = :none)
+    objvalueplot = scatter!(-vals[1:r+1],
+        color = :orange,
+        label = "First stage")
+    objvalueplot = scatter!([r], [-objvalue],
+        color = :violetred4,
+        label = "Second stage")
 
     Random.seed!(1234*1)
     x_partitions = balanced_kfold(y, 2)
@@ -314,6 +380,11 @@ function Figure7()
         color=[:orange :violetred4 :black],
         label="")
 
-    plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1500,500), margin=6mm)
+    #plots_Wfab = plot(Wfabpointsplot, WfabkNNplot, layout=(1,2), size=(1500,500), margin=6mm)
+    l = @layout [
+        a{0.5w} [grid(2,1, heights = [0.4, 0.6])]
+    ]
+    plots_Wfab = plot(Wfabpointsplot, objvalueplot, WfabkNNplot, layout=l, size=(1500,500), margin=6mm)
+
     return plots_Wfab
 end

@@ -7,8 +7,13 @@ y = Vector{Int64}(TQ_data[:,end]);
 
 ##learn SNCA matrix for Figure 2
 Random.seed!(1)
-objvalue_SNCA, A_SNCA = algSNCA(x_matrix, y, objective=NCALog())
+objvalue_SNCA, A_SNCA, vals = algSNCA(x_matrix, y, objective=NCALog())
 save_object("res/TQ_SNCA_A.jld2", A_SNCA)
+save_object("res/TQ_SNCA_vals.jld2", vals)
+save_object("res/TQ_SNCA_objvalue.jld2", objvalue_SNCA)
+
+objvalue_NCA, A_NCA, vals = algNCA(x_matrix, y, objective=NCALog())
+
 
 #for Figure 2 (bottom)
 zerosklkth_SNCA = StateKLkth([0,0,0,0], x_matrix, y, A_SNCA);
