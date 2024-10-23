@@ -7,6 +7,8 @@ y = Vector{Int64}(WF_data[:,end]);
 
 I₁₁ = Matrix(I,11,11)
 SNCA_Metrics = Array{Matrix{Float64}}(undef, 10);
+SNCA_objvalues = Vector{Float64}(undef, 10);
+SNCA_vals = Array{Vector{Float64}}(undef, 10);
 #NCA_Metrics = Array{Matrix{Float64}}(undef, 10);
 SNCA_kNN = Matrix{Float64}(undef, 30, 10);
 NCA_kNN = Matrix{Float64}(undef, 30, 10);
@@ -30,8 +32,11 @@ for i in 1:5
         y_kNN_rare = ym[rare_indx]
 
         Random.seed!(2*(i-1) + m)
-        objvalue_SNCA, A_SNCA = algSNCA(x_metrictrain, y_metrictrain, objective=NCALog())
+        objvalue_SNCA, A_SNCA, vals = algSNCA(x_metrictrain, y_metrictrain, objective=NCALog())
         SNCA_Metrics[2*(i-1) + m] = A_SNCA
+        SNCA_objvalues[2*(i-1) + m] = objvalue_SNCA
+        SNCA_vals[2*(i-1) + m] = vals
+
         Random.seed!(2*(i-1) + m)
         initializations = initsLHS(11^2, n=10, style=initMatrix(), nrows=11);
         objvalues = Vector{Float64}(undef, length(initializations));
@@ -59,5 +64,7 @@ save_object("res/WF_SNCA_kNN.jld2", SNCA_kNN)
 save_object("res/WF_NCA_kNN.jld2", NCA_kNN)
 save_object("res/WF_Euclidean_kNN.jld2", Euclidean_kNN)
 
-#save example SNCA solution matrix for Figure 7 (left)
+#save example SNCA solution matrix for Figure 8 (left) and objective values for Figure 8 (top right)
 save_object("res/WF_SNCA_A.jld2", SNCA_Metrics[1])
+save_object("res/WF_SNCA_objvalue.jld2", SNCA_objvalues[8])
+save_object("res/WF_SNCA_vals.jld2", SNCA_vals[8])
